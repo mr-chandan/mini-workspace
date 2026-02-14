@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Knowledge Q&A
 
-## Getting Started
+A RAG (Retrieval-Augmented Generation) web app. Upload documents, ask questions, get AI answers with sources.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Upload text files and PDFs
+- Document list with delete
+- Ask questions in natural language
+- AI answers with source tags
+- User isolation (documents partitioned by IP)
+- Rate limiting
+- System health status page
+- Clean minimal UI
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 19, Tailwind CSS
+- **Vector DB**: Pinecone (with namespaces for user isolation)
+- **Embeddings**: NVIDIA llama-3.2-nv-embedqa-1b-v2 (1024 dimensions)
+- **LLM**: Google Gemini 3 Flash
+- **PDF Parsing**: unpdf
+
+## How to Run
+
+### Docker (One Command)
+
+1. Create `.env.local` with your API keys:
+   ```
+   PINECONE_API_KEY=your-pinecone-api-key
+   PINECONE_INDEX_NAME=quickstart
+   NVIDIA_API_KEY=your-nvidia-api-key
+   GEMINI_API_KEY=your-gemini-api-key
+   ```
+
+2. Run:
+   ```bash
+   docker compose up --build
+   ```
+
+3. Open [http://localhost:3000](http://localhost:3000)
+
+### Manual Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Create `.env.local` with your API keys (same as above)
+
+3. Ensure Pinecone index has 1024 dimensions.
+
+4. Run:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000)
+
+## Pages
+
+- `/` - Landing page
+- `/dashboard` - Upload docs & chat
+- `/status` - Health check
+
+## What is Done
+
+- [x] Document upload (text + PDF)
+- [x] Document delete
+- [x] Document chunking
+- [x] Vector storage in Pinecone
+- [x] User isolation via namespaces
+- [x] Semantic search
+- [x] Answer generation with Gemini
+- [x] Source tags (no inline citations)
+- [x] Rate limiting with retry/backoff
+- [x] Health status page
+- [x] Input validation
+- [x] Markdown rendering in chat
+- [x] Minimal UI
+- [x] Docker support (one command)
+
+## What is Not Done
+
+- [ ] Authentication (currently IP-based isolation)
+- [ ] Support for more file types (DOCX, etc)
+- [ ] Conversation memory
+- [ ] Production deployment
+
+## Project Structure
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+app/
+  page.tsx              # Landing
+  dashboard/page.tsx    # Chat & upload
+  status/page.tsx       # Health
+  api/
+    documents/route.ts  # Upload, list, delete
+    ask/route.ts        # Q&A
+    health/route.ts     # Health check
+lib/
+  pinecone.ts           # Pinecone client
+  embeddings.ts         # NVIDIA embeddings + retry
+  llm.ts                # Gemini client
+  rateLimit.ts          # Rate limiting
+```
