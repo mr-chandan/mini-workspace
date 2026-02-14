@@ -19,7 +19,7 @@ A RAG (Retrieval-Augmented Generation) web app. Upload documents, ask questions,
 - **Vector DB**: Pinecone (with namespaces for user isolation)
 - **Embeddings**: NVIDIA llama-3.2-nv-embedqa-1b-v2 (1024 dimensions)
 - **LLM**: Google Gemini 3 Flash
-- **Document Parsing**: pdf-parse (PDF), jszip (PPTX), mammoth (DOCX)
+- **Document Parsing**: unpdf (PDF), office-text-extractor (PPTX), mammoth (DOCX)
 
 ## How to Run
 
