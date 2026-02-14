@@ -33,6 +33,7 @@
 - **Provider**: Pinecone
 - **Why**: Managed, fast search, namespaces for user isolation, free tier
 
-### PDF Parsing
-- **Library**: `unpdf`
-- **Why**: Works with Next.js (no worker issues like pdf-parse)
+### Document Parsing
+- **PDF**: `pdf-parse` - Pure Node.js, works with serverless (Vercel)
+- **PPTX**: `jszip` - Parse PPTX as ZIP, extract text from XML slides 
+- **DOCX**: `mammoth` - Reliable Word document parsing

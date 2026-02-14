@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getIndex } from '@/lib/pinecone';
 import { getEmbedding, getEmbeddingsBatch } from '@/lib/embeddings';
 import { getClientIP, checkRateLimit, rateLimitResponse, uploadRateLimit } from '@/lib/rateLimit';
-import { extractText } from 'unpdf';
-import { getTextExtractor } from 'office-text-extractor';
+import { PDFParse } from 'pdf-parse';
+import JSZip from 'jszip';
 import mammoth from 'mammoth';
 
 // Force Node.js runtime for PDF parsing compatibility
@@ -12,6 +12,36 @@ export const runtime = 'nodejs';
 // Simple in-memory document store (in production, use a real database)
 // We store document list in Pinecone metadata
 
+// Extract text from PPTX (which is a ZIP file containing XML)
+async function extractPptxText(buffer: Buffer): Promise<string> {
+  const zip = await JSZip.loadAsync(buffer);
+  const textParts: string[] = [];
+  
+  // Get all slide files and sort them
+  const slideFiles = Object.keys(zip.files)
+    .filter(name => name.match(/ppt\/slides\/slide\d+\.xml$/))
+    .sort((a, b) => {
+      const numA = parseInt(a.match(/slide(\d+)\.xml/)?.[1] || '0');
+      const numB = parseInt(b.match(/slide(\d+)\.xml/)?.[1] || '0');
+      return numA - numB;
+    });
+  
+  for (const slideFile of slideFiles) {
+    const content = await zip.files[slideFile].async('text');
+    // Extract text from XML tags (simplified regex for <a:t> tags which contain text)
+    const textMatches = content.match(/<a:t>([^<]*)<\/a:t>/g) || [];
+    const slideText = textMatches
+      .map(match => match.replace(/<\/?a:t>/g, ''))
+      .filter(t => t.trim())
+      .join(' ');
+    if (slideText.trim()) {
+      textParts.push(slideText);
+    }
+  }
+  
+  return textParts.join('\n\n');
+}
+
 async function extractTextFromFile(file: File): Promise<string> {
   const fileName = file.name.toLowerCase();
   
@@ -19,13 +49,12 @@ async function extractTextFromFile(file: File): Promise<string> {
   if (fileName.endsWith('.pdf')) {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const { text } = await extractText(arrayBuffer);
-      
-      // text is an array of strings (one per page), join them
-      const fullText = Array.isArray(text) ? text.join('\n\n') : text;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const parser = new PDFParse(uint8Array);
+      const result = await parser.getText();
       
       // Clean up the extracted text - remove excessive whitespace
-      const cleanedText = fullText
+      const cleanedText = result.text
         .replace(/\r\n/g, '\n')
         .replace(/\n{3,}/g, '\n\n')
         .trim();
@@ -46,8 +75,7 @@ async function extractTextFromFile(file: File): Promise<string> {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      const extractor = getTextExtractor();
-      const text = await extractor.extractText({ input: buffer, type: 'buffer' });
+      const text = await extractPptxText(buffer);
       
       const cleanedText = text
         .replace(/\r\n/g, '\n')

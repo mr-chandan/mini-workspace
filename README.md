@@ -4,7 +4,7 @@ A RAG (Retrieval-Augmented Generation) web app. Upload documents, ask questions,
 
 ## Features
 
-- Upload text files and PDFs
+- Upload text files, PDFs, PowerPoint (PPTX), and Word docs (DOCX)
 - Document list with delete
 - Ask questions in natural language
 - AI answers with source tags
@@ -19,7 +19,7 @@ A RAG (Retrieval-Augmented Generation) web app. Upload documents, ask questions,
 - **Vector DB**: Pinecone (with namespaces for user isolation)
 - **Embeddings**: NVIDIA llama-3.2-nv-embedqa-1b-v2 (1024 dimensions)
 - **LLM**: Google Gemini 3 Flash
-- **PDF Parsing**: unpdf
+- **Document Parsing**: pdf-parse (PDF), jszip (PPTX), mammoth (DOCX)
 
 ## How to Run
 
@@ -66,7 +66,7 @@ A RAG (Retrieval-Augmented Generation) web app. Upload documents, ask questions,
 
 ## What is Done
 
-- [x] Document upload (text + PDF)
+- [x] Document upload (text, PDF, PPTX, DOCX)
 - [x] Document delete
 - [x] Document chunking
 - [x] Vector storage in Pinecone
@@ -84,9 +84,8 @@ A RAG (Retrieval-Augmented Generation) web app. Upload documents, ask questions,
 ## What is Not Done
 
 - [ ] Authentication (currently IP-based isolation)
-- [ ] Support for more file types (DOCX, etc)
 - [ ] Conversation memory
-- [ ] Production deployment
+- [ ] Real-time collaboration
 
 ## Project Structure
 
