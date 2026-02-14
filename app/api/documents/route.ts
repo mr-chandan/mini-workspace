@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getIndex } from '@/lib/pinecone';
 import { getEmbedding, getEmbeddingsBatch } from '@/lib/embeddings';
 import { getClientIP, checkRateLimit, rateLimitResponse, uploadRateLimit } from '@/lib/rateLimit';
-import { PDFParse } from 'pdf-parse';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require('pdf-parse');
 import JSZip from 'jszip';
 import mammoth from 'mammoth';
 
@@ -49,12 +50,11 @@ async function extractTextFromFile(file: File): Promise<string> {
   if (fileName.endsWith('.pdf')) {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const parser = new PDFParse(uint8Array);
-      const result = await parser.getText();
+      const buffer = Buffer.from(arrayBuffer);
+      const data = await pdfParse(buffer);
       
       // Clean up the extracted text - remove excessive whitespace
-      const cleanedText = result.text
+      const cleanedText = data.text
         .replace(/\r\n/g, '\n')
         .replace(/\n{3,}/g, '\n\n')
         .trim();
